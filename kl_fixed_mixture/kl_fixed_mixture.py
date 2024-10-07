@@ -53,6 +53,13 @@ class KLFixedMixture(torch.autograd.Function):
     Autograd is implemented for a and k, but not b
     Squared error between k and k_achieved should be added to any loss function
     so that k can be moved to a region where changing it affects the value of x
+
+    Usage: logx, kl_achieved = KLFixedMixture.apply(kl_target, loga, logb)
+    
+    loga, logb, logx are the logarithms of (batches of) probability distributions
+    represented as torch tensors of dimension (n, d) or (d,)
+    kl_target is the target KL divergence represented as a torch tensor of
+    dimension (n, 1) or (n,) or ()
     """
     @staticmethod
     def forward(ctx, k, loga, logb):
@@ -60,13 +67,17 @@ class KLFixedMixture(torch.autograd.Function):
         if dim == 1:
             loga = loga.unsqueeze(0)
             logb = logb.unsqueeze(0)
-            k = k.unsqueeze(0)
+        orig_k_dim = k.dim()
+        while k.dim() < 2:
+            k = k.unsqueeze(1)
         alpha = findalphafork(loga, logb, k)
         logx, kl_achieved = logx_and_kl(loga, logb, alpha)
         ctx.save_for_backward(loga, logb, logx, k, alpha)
         if dim == 1:
             logx = logx.squeeze(0)
-            kl_achieved = kl_achieved.squeeze(0)
+            kl_achieved = kl_achieved.squeeze(1)
+            if orig_k_dim == 0:
+                kl_achieved = kl_achieved.squeeze(0)
         return logx, kl_achieved
 
     @staticmethod
