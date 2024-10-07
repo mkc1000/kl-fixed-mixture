@@ -69,4 +69,28 @@ class Actor(torch.nn.Module):
         loga = loga - torch.logsumexp(loga, dim=-1, keepdim=True)
         logy, kl_achieved = KLFixedMixture.apply(kl_target, loga, log_base_dist)
         return torch.softmax(logy, dim=-1), torch.square(kl_achieved - kl_target) # softmax is the same as exp here
+
+    # Now for no apparent reason, we'll try to make the Actor resemble another policy.
+
+    def normal(x, y):
+        return torch.normal(torch.zeros(x, y), torch.ones(x, y))
+    
+    actor = Actor(5, 4, 3, 6)
+    states = normal(10, 5)
+    target_policy = torch.softmax(normal(10, 6), dim=-1)
+    base_policy = torch.softmax(normal(10, 6), dim=-1)
+    kl_budget = torch.exp(normal(10, 1))
+    
+    optimizer = torch.optim.Adam([
+                            {'params': actor.parameters(), 'lr': 1e-2, 'eps': 1e-8},
+                        ])
+    
+    for _ in range(100):
+        policy, kl_error = actor(states, kl_budget, base_policy)
+        loss = torch.sum(torch.square(target_policy - policy)) + torch.sum(kl_error)
+        if _ % 10 == 0:
+            print(loss.item())
+        optimizer.zero_grad()
+        loss.mean().backward()
+        optimizer.step()
 ```
