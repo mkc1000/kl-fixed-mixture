@@ -3,7 +3,7 @@ KLFixedMixture is a Pytorch function that outputs a probability distribution x b
 
 ## Installation
 
-You can install the package from GitHub:
+You can install the package with pip:
 
 ```bash
 pip install git+https://github.com/mkc1000/kl-fixed-mixture.git
