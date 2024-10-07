@@ -18,10 +18,13 @@ from kl_fixed_mixture import KLFixedMixture
 # represented as torch tensors of shape (n, d) or (d,)
 # kl_target is the target KL divergence represented as a torch tensor of
 # shape (n, 1) or (n,) or ()
-# logx and kl_achieved have the same shape as loga and kl_target
 
 logx, kl_achieved = KLFixedMixture.apply(kl_target, loga, logb)
 loss += torch.square(kl_achieved - kl_target) # this line encourages kl_target to be set to a value where grad wrt kl_target is nonzero.
+
+# logx and kl_achieved have the same shape as loga and kl_target
+# x = alpha * a + (1-alpha) * b for some alpha in [0, 1]
+# kl_achieved - kl_target is minimized subject to alpha in [0, 1]
 ```
 
 ## Extended Usage Example
