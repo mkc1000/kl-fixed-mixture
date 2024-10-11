@@ -1,6 +1,8 @@
 # kl-fixed-mixture
 KLFixedMixture is a Pytorch function that outputs a probability distribution x between a and b with KL(x || b) as close as possible to a desired k. It is PyTorch-differentiable wrt a and k.
 
+Please cite this paper: https://arxiv.org/abs/2410.06213.
+
 ## Installation
 
 You can install the package with pip:
